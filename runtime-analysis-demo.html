@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Runtime Analysis Demo</title>
+</head>
+<body>
+<label>Code:<br/><textarea id="input" rows="30" cols="80"></textarea></label><br/>
+<button id="run" type="button">Analyse Runtime</button><br/><br/>
+<label>Solution valid: <input id="outputSolutionValid" disabled /></label><br/>
+<label>Time taken: <input id="outputTimeTaken" disabled /></label><br/>
+<label>Runtime complexity: <input id="outputRuntimeComplexity" disabled /></label>
+
+<script src="data.js"></script>
+<script>
+  const inputElement = document.getElementById('input');
+  const outputTimeTaken = document.getElementById('outputTimeTaken');
+  const outputSolutionValid = document.getElementById('outputSolutionValid');
+  const outputRuntimeComplexity = document.getElementById('outputRuntimeComplexity');
+  const runButton = document.getElementById('run');
+  const benchmarkStart = Date.now();
+  console.log(eval(
+    `const a = new Array(10e5).fill(0);
+     a.forEach((x, i) => a[i] = i + 5);
+     a.reduce((sum, n) => sum + n);`
+  ));
+  const benchmarkTime = Date.now() - benchmarkStart;
+  console.log(`benchmark: ${benchmarkTime} (ms)`)
+
+  runButton.addEventListener('click', () => {
+    runButton.textContent = 'Running...';
+    runButton.disabled = true;
+
+    setTimeout(() => {
+      const expected = 2003985496;
+      const startTime = Date.now();
+      const code = inputElement.value;
+
+      let returned;
+      try {
+        returned = eval(`${code}; finalState(data);`);
+      } catch (e) {
+        alert(e);
+        return;
+      } finally {
+        runButton.textContent = 'Analyse Runtime';
+        runButton.disabled = false;
+      }
+
+      const timeTakenInMS = Date.now() - startTime;
+      outputSolutionValid.value = returned === expected ? '✅' : '❌';
+      outputTimeTaken.value = `${timeTakenInMS} (ms)`;
+
+      let runtimeComplexity = 'O(1)';
+      if (timeTakenInMS >= Math.floor(benchmarkTime / 10)) runtimeComplexity = 'O(n)';
+      if (timeTakenInMS >= Math.floor(benchmarkTime * 10)) runtimeComplexity = 'O(n²)';
+      outputRuntimeComplexity.value = runtimeComplexity;
+    });
+  });
+
+</script>
+</body>
+</html>
